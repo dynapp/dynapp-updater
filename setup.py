@@ -7,11 +7,10 @@ dependencies = ['click', 'gitpython']
 
 setup(
     name='dynapp-updater',
-    version='0.1.0',
-    url='https://github.com/ProjectBarks/dynapp-updater',
+    version='1.0.0',
+    url='https://github.com/dynapp/dynapp-updater',
     license='BSD',
-    author='Brandon Barker',
-    author_email='brandon@brandonbarker.me',
+    author='Dynapp Team',
     description='Manages and Updates all the Dynapp Repos',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
