@@ -3,7 +3,7 @@ Manages and Updates all the Dynapp Repo's
 """
 from setuptools import find_packages, setup
 
-dependencies = ['click']
+dependencies = ['click', 'gitpython']
 
 setup(
     name='dynapp-updater',
@@ -15,6 +15,7 @@ setup(
     description='Manages and Updates all the Dynapp Repos',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
+    package_data={'': ['resources/*']},
     include_package_data=True,
     zip_safe=False,
     platforms='any',
