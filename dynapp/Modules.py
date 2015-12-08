@@ -7,7 +7,9 @@ from os import path, getcwd, makedirs
 ROBOT_CORE_URL = 'https://raw.githubusercontent.com/ftctechnh/ftc_app/master/FtcRobotController/libs/RobotCore-release.aar'
 OPMODE_URL = 'https://api.github.com/repos/ftctechnh/ftc_app/contents/FtcRobotController/src/main/java/com/qualcomm/ftcrobotcontroller/opmodes'
 MAVEN_ADD_CMD = 'mvn install:install-file -DgroupId=com.qualcomm -DartifactId=robotcore -Dversion={0} -Dpackaging=jar -Dfile={1} -DlocalRepositoryPath={2}'
+MAVEN_INSTALL_CMD = 'cd {0} & mvn -U clean install -Dmaven.repo.local={1}'
 OPMODE_WHITELIST = ['package-info.java', 'FtcOpModeRegister.java']
+
 
 class BaseModule:
     def __init__(self, name, module_dir):
@@ -38,16 +40,31 @@ class BaseModule:
         info('Download Complete!')
 
 
-class RobotCoreModule(BaseModule):
+class MavenPluginModule(BaseModule):
     def __init__(self):
-        BaseModule.__init__(self, 'Robot Core', 'robot-core')
+        BaseModule.__init__(self, 'Maven Module', 'dynapp-maven-plugin')
+
+    def init(self):
+        if not path.exists(self.dir):
+            error('Unable to find module: {0}'.format(self.name))
+        self.repo = Repo(self.dir)
+
+    def update(self, version):
+        return
+
+
+class MavenRepoModule(BaseModule):
+
+    def __init__(self):
+        BaseModule.__init__(self, 'Maven Repository', 'dynapp-maven-repository')
+        self.mavenPlugin = MavenPluginModule()
 
     def update(self, version):
         self.init()
-        info('Retrieving robot-core...')
+        info('Retrieving robot core...')
         zip_stream = StringIO.StringIO(get_url_retry(ROBOT_CORE_URL))
         robot_core = zipfile.ZipFile(zip_stream).open('classes.jar').read()
-        info('Saving robot-core...')
+        info('Saving robot core...')
         with open(path.join(self.dir, 'robotcore-latest.jar'), 'wb') as jar:
             jar.write(robot_core)
         info('Robot-core Saved!')
@@ -55,6 +72,14 @@ class RobotCoreModule(BaseModule):
         info('Maven-izing project...')
         status, _ = commands.getstatusoutput(
             MAVEN_ADD_CMD.format(version, path.join(self.dir, 'robotcore-latest.jar'), path.join(self.dir, 'repo')))
+        if status != 0:
+            error('Maven is not installed!' if status == 32512 else 'Maven failed to install dependency')
+        info('Maven sync complete!')
+
+        self.mavenPlugin.reset()
+        commands.getstatusoutput("")
+        info("Maven-izing plugin...")
+        status, _ = commands.getstatusoutput(MAVEN_INSTALL_CMD.format(self.mavenPlugin.dir, path.join(self.dir, 'repo')))
         if status != 0:
             error('Maven is not installed!' if status == 32512 else 'Maven failed to install dependency')
         info('Maven sync complete!')
@@ -100,4 +125,4 @@ class DynappModule(BaseModule):
 
 
 def get_modules():
-    return [RobotCoreModule(), DynappModule()]
+    return [MavenRepoModule(), DynappModule(), MavenPluginModule()]

@@ -4,3 +4,6 @@
 [submodule "modules/dynapp-module-maven"]
 	path = modules/dynapp-module-maven
 	url = https://github.com/dynapp/dynapp-module-maven.git
+[submodule "modules/dynapp-maven-plugin"]
+	path = modules/dynapp-maven-plugin
+	url = https://github.com/dynapp/dynapp-maven-plugin.git
