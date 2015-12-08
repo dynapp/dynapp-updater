@@ -1,6 +1,6 @@
-[submodule "modules/robot-core"]
+[submodule "modules/maven-repository"]
 	path = modules/robot-core
-	url = https://github.com/dynapp/robot-core.git
+	url = https://github.com/dynapp/maven-repository.git
 [submodule "modules/dynapp-module-maven"]
 	path = modules/dynapp-module-maven
 	url = https://github.com/dynapp/dynapp-module-maven.git
