@@ -1,5 +1,5 @@
 [submodule "modules/maven-repository"]
-	path = modules/robot-core
+	path = modules/dynapp-maven-repository
 	url = https://github.com/dynapp/maven-repository.git
 [submodule "modules/dynapp-module-maven"]
 	path = modules/dynapp-module-maven
