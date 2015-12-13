@@ -7,7 +7,7 @@ from os import path, getcwd, makedirs
 ROBOT_CORE_URL = 'https://raw.githubusercontent.com/ftctechnh/ftc_app/master/FtcRobotController/libs/RobotCore-release.aar'
 OPMODE_URL = 'https://api.github.com/repos/ftctechnh/ftc_app/contents/FtcRobotController/src/main/java/com/qualcomm/ftcrobotcontroller/opmodes'
 MAVEN_ADD_CMD = 'mvn install:install-file -DgroupId=com.qualcomm -DartifactId=robotcore -Dversion={0} -Dpackaging=jar -Dfile={1} -DlocalRepositoryPath={2}'
-MAVEN_INSTALL_CMD = 'cd {0} & mvn -U clean install -Dmaven.repo.local={1}'
+MAVEN_INSTALL_CMD = 'cd {0} && mvn clean install -Dmaven.repo.local={1}'
 OPMODE_WHITELIST = ['package-info.java', 'FtcOpModeRegister.java']
 
 
@@ -39,6 +39,21 @@ class BaseModule:
         self.repo.remotes.origin.pull()
         info('Download Complete!')
 
+    def publish(self):
+        self.init()
+        if not self.repo.is_dirty():
+            info("No changes detected...")
+            return
+        info("Committing changes...")
+        repo_index = self.repo.index
+        for tracked_file in self.repo.untracked_files:
+            info(tracked_file)
+            repo_index.add(tracked_file)
+        repo_index.commit("[Dynapp Updater] Updated Repository")
+        info("Pushing changes...")
+        self.repo.remotes.origin.push(['HEAD:master', '--force'])
+        info("Pushed changes!")
+
 
 class MavenPluginModule(BaseModule):
     def __init__(self):
@@ -50,6 +65,9 @@ class MavenPluginModule(BaseModule):
         self.repo = Repo(self.dir)
 
     def update(self, version):
+        return
+
+    def publish(self):
         return
 
 
@@ -77,7 +95,6 @@ class MavenRepoModule(BaseModule):
         info('Maven sync complete!')
 
         self.mavenPlugin.reset()
-        commands.getstatusoutput("")
         info("Maven-izing plugin...")
         status, _ = commands.getstatusoutput(MAVEN_INSTALL_CMD.format(self.mavenPlugin.dir, path.join(self.dir, 'repo')))
         if status != 0:

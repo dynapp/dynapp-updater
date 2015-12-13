@@ -74,4 +74,5 @@ def update(username, password):
 @main.command('publish', short_help='Publish all changes to the Github Repository')
 @Task('Publish')
 def publish():
-    click.echo('Welcome to: {0}'.format(click.style('Publish', fg='blue', bold=True)))
+    for module in get_modules():
+        module.publish()
