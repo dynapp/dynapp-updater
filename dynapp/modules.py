@@ -1,4 +1,4 @@
-import click, zipfile, StringIO, commands, json, base64 
+import click, zipfile, StringIO, commands, json, base64
 from util import info, error, get_url_retry
 from git import *
 import shutil
