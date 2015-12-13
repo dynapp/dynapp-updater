@@ -1,4 +1,4 @@
-import click, zipfile, StringIO, commands, json, base64, urllib2
+import click, zipfile, StringIO, commands, json, base64 
 from util import info, error, get_url_retry
 from git import *
 import shutil
@@ -39,20 +39,20 @@ class BaseModule:
         self.repo.remotes.origin.pull()
         info('Download Complete!')
 
-    def publish(self):
+    def publish(self, version):
         self.init()
         if not self.repo.is_dirty():
-            info("No changes detected...")
+            info('No changes detected...')
             return
-        info("Committing changes...")
+        info('Committing changes...')
         repo_index = self.repo.index
         for tracked_file in self.repo.untracked_files:
             info(tracked_file)
             repo_index.add(tracked_file)
-        repo_index.commit("[Dynapp Updater] Updated Repository")
-        info("Pushing changes...")
+        repo_index.commit('[Dynapp Updater] Updated to {0}'.format(version))
+        info('Pushing changes...')
         self.repo.remotes.origin.push(['HEAD:master', '--force'])
-        info("Pushed changes!")
+        info('Pushed changes!')
 
 
 class MavenPluginModule(BaseModule):
@@ -65,10 +65,10 @@ class MavenPluginModule(BaseModule):
         self.repo = Repo(self.dir)
 
     def update(self, version):
-        return
+        pass
 
-    def publish(self):
-        return
+    def publish(self, version):
+        pass
 
 
 class MavenRepoModule(BaseModule):
@@ -95,7 +95,7 @@ class MavenRepoModule(BaseModule):
         info('Maven sync complete!')
 
         self.mavenPlugin.reset()
-        info("Maven-izing plugin...")
+        info('Maven-izing plugin...')
         status, _ = commands.getstatusoutput(MAVEN_INSTALL_CMD.format(self.mavenPlugin.dir, path.join(self.dir, 'repo')))
         if status != 0:
             error('Maven is not installed!' if status == 32512 else 'Maven failed to install dependency')
@@ -133,13 +133,12 @@ class DynappModule(BaseModule):
         info('Clearing old template code...')
         old_source = path.join(self.dir, 'src/main/java/com')
         if path.exists(old_source):
-            shutil.rmtree(path.join(self.dir, 'src/main/java/com'))
+            shutil.rmtree(old_source)
         info('Template code cleared!')
 
         info('Cloning new template code...')
         self.github_download(OPMODE_URL, path.join(self.dir, 'src/main/java/com/qualcomm/opmodes/'), OPMODE_WHITELIST)
         info('Cloned!')
-
 
 def get_modules():
     return [MavenRepoModule(), DynappModule(), MavenPluginModule()]

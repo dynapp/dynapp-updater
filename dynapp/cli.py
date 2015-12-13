@@ -1,10 +1,8 @@
-import click, json
+import click
 from modules import get_modules
-from util import info, get_url_retry
+from util import info, get_version
 from githubauth import init_github
 
-FTC_LAST_COMMIT_URL = 'https://api.github.com/repos/ftctechnh/ftc_app/git/refs/heads/master'
-FTC_TAGS_URL = 'https://api.github.com/repos/ftctechnh/ftc_app/tags'
 
 class Task(object):
     def __init__(self, name):
@@ -50,29 +48,14 @@ def reset():
 @Task('Update')
 def update(username, password):
     info('Searching for version...')
-    version = ''
-    try:
-        last_commit = json.loads(get_url_retry(FTC_LAST_COMMIT_URL))['object']['sha']
-        tags = json.loads(get_url_retry(FTC_TAGS_URL))
-        for item in tags:
-            if item['commit']['sha'] != last_commit:
-                continue
-            version = item['name']
-            info('Version identified as: {0}'.format(version))
-    except:
-        pass
-
-    if not version:
-        info('Version could not be discovered!')
-        version = click.prompt('Please enter in a version [1.0.0]', type=str)
 
     init_github(username, password)
     for module in get_modules():
-        module.update(version)
+        module.update(get_version())
 
 
 @main.command('publish', short_help='Publish all changes to the Github Repository')
 @Task('Publish')
 def publish():
     for module in get_modules():
-        module.publish()
+        module.publish(get_version())
